@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vyapar AI — Smart Business Co-Pilot for Indian Kirana & Retail</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- ================= SIDEBAR NAVIGATION ================= -->
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">₹</div>
+      <div class="brand-text">
+        <h1>Vyapar AI</h1>
+        <span>Smart Business Co-Pilot</span>
+      </div>
+      <button class="mobile-toggle-btn no-print" id="sidebarCloseBtn" style="color:#94a3b8; margin-left:auto;">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Store Management</div>
+      <a class="nav-item active" data-tab-target="dashboard">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" data-tab-target="sales">
+        <span class="nav-icon">🛍️</span>
+        <span>Sales & Billing (Bikri)</span>
+      </a>
+      <a class="nav-item" data-tab-target="expenses">
+        <span class="nav-icon">📉</span>
+        <span>Expenses (Kharcha)</span>
+      </a>
+      <a class="nav-item" data-tab-target="inventory">
+        <span class="nav-icon">📦</span>
+        <span>Inventory & Stock</span>
+        <span class="nav-badge danger" id="sidebarLowStockBadge" style="display:none;">0</span>
+      </a>
+
+      <div class="nav-section-title">Finance & Intelligence</div>
+      <a class="nav-item" data-tab-target="calculator">
+        <span class="nav-icon">🧮</span>
+        <span>Profit Calculator</span>
+      </a>
+      <a class="nav-item" data-tab-target="ai">
+        <span class="nav-icon">✨</span>
+        <span>Ask Vyapar AI</span>
+        <span class="nav-badge ai">AI Co-Pilot</span>
+      </a>
+      <a class="nav-item" data-tab-target="insights">
+        <span class="nav-icon">⚡</span>
+        <span>Smart Alerts Hub</span>
+      </a>
+      <a class="nav-item" data-tab-target="udhar">
+        <span class="nav-icon">🤝</span>
+        <span>Udhar (Credit) Khata</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="shop-card-mini">
+        <div class="shop-avatar">SG</div>
+        <div class="shop-meta">
+          <h4>Shree Ganesh Kirana</h4>
+          <p>● Live • Jaipur Store</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="app-main">
+
+    <!-- Top Sticky Header -->
+    <header class="app-header no-print">
+      <div class="header-left">
+        <button class="mobile-toggle-btn" id="mobileMenuToggle">☰</button>
+        <div class="header-title-box">
+          <h2 id="headerPageTitle">Dukan Dashboard</h2>
+          <p id="headerPageSubtitle">Real-time overview of your grocery store performance</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span id="currentDateDisplay" style="font-size:0.82rem; color:var(--slate-500); display:inline-block; margin-right:0.5rem;"></span>
+
+        <button class="quick-action-btn primary" id="headerNewSaleBtn">
+          <span>🛍️</span>
+          <span class="btn-label">New Sale</span>
+        </button>
+
+        <button class="quick-action-btn success" id="headerAddExpBtn">
+          <span>+</span>
+          <span class="btn-label">Expense</span>
+        </button>
+
+        <button class="quick-action-btn outline" id="headerAddPrdBtn">
+          <span>📦</span>
+          <span class="btn-label">Product</span>
+        </button>
+
+        <button class="quick-action-btn outline" id="exportDataBtn" title="Export Backup JSON">
+          <span>💾</span>
+        </button>
+
+        <button class="quick-action-btn outline" id="resetDataBtn" title="Reset Sample Data">
+          <span>🔄</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Body Tabs -->
+    <div class="page-container">
+
+      <!-- ================= 1. DASHBOARD TAB ================= -->
+      <section class="tab-pane active" id="tab-dashboard">
+        <!-- Dashboard Filter & Origin Selection Toolbar -->
+        <div class="dashboard-filter-toolbar">
+          <div class="filter-toolbar-left">
+            <span class="filter-toolbar-label">⏱️ Timeframe:</span>
+            <div class="filter-pill-group" id="dashboardPeriodGroup">
+              <button class="filter-pill-btn active" data-period="today">Today</button>
+              <button class="filter-pill-btn" data-period="month">This Month</button>
+              <button class="filter-pill-btn" data-period="all">All-Time</button>
+            </div>
+          </div>
+          <div class="filter-toolbar-right">
+            <span class="filter-toolbar-label">🏷️ Records Filter:</span>
+            <div class="filter-pill-group" id="dashboardOriginGroup">
+              <button class="filter-pill-btn active" data-origin="all">All Records</button>
+              <button class="filter-pill-btn" data-origin="actual">Actual (User) Only</button>
+              <button class="filter-pill-btn" data-origin="demo">Demo (Sample) Only</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Metric Cards Grid: Displaying Revenue, Gross Profit, Expenses, and Net Profit as Separate Metrics -->
+        <div class="kpi-grid">
+          <!-- 1. Revenue = sum of completed sales -->
+          <div class="kpi-card" id="cardRevenue">
+            <div class="kpi-top">
+              <span class="kpi-label" id="kpiRevenueLabel">Revenue (Completed Sales)</span>
+              <div class="kpi-icon-badge green">₹</div>
+            </div>
+            <div class="kpi-value" id="kpiRevenue">₹0</div>
+            <!-- Keep backward compatible IDs for test suites & metric sync -->
+            <span id="kpiTodaySales" style="display:none;">₹0</span>
+            <span id="kpiMonthSales" style="display:none;">₹0</span>
+            <span id="kpiTodaySalesBreakdown" style="display:none;"></span>
+            <span id="kpiTodayMarginBadge" style="display:none;"></span>
+            <span id="kpiMonthNetProfit" style="display:none;"></span>
+            <div class="kpi-meta" id="kpiRevenueMeta">0 Completed Bills</div>
+            <div class="kpi-origin-tag" id="kpiRevenueOrigin">Actual: ₹0 • Demo: ₹0</div>
+          </div>
+
+          <!-- 2. Gross Profit = revenue minus cost of goods sold -->
+          <div class="kpi-card" id="cardGrossProfit">
+            <div class="kpi-top">
+              <span class="kpi-label" id="kpiGrossProfitLabel">Gross Profit (Bikri - COGS)</span>
+              <div class="kpi-icon-badge indigo">📈</div>
+            </div>
+            <div class="kpi-value" id="kpiGrossProfit" style="color:var(--success);">₹0</div>
+            <span id="kpiTodayProfit" style="display:none;">₹0</span>
+            <div class="kpi-meta" id="kpiGrossProfitMeta">
+              <span>COGS: ₹0</span>
+              <span class="badge-pill success" id="kpiGrossMarginBadge">0.0% Margin</span>
+            </div>
+            <div class="kpi-origin-tag" id="kpiGrossProfitOrigin">Actual: ₹0 • Demo: ₹0</div>
+          </div>
+
+          <!-- 3. Operating Expenses = deduplicated business expenses -->
+          <div class="kpi-card" id="cardExpenses">
+            <div class="kpi-top">
+              <span class="kpi-label" id="kpiExpensesLabel">Operating Expenses (Kharcha)</span>
+              <div class="kpi-icon-badge rose">📉</div>
+            </div>
+            <div class="kpi-value" id="kpiExpenses" style="color:var(--danger);">₹0</div>
+            <div class="kpi-meta" id="kpiExpensesMeta">0 Deduplicated Expenses</div>
+            <div class="kpi-origin-tag" id="kpiExpensesOrigin">Actual: ₹0 • Demo: ₹0</div>
+          </div>
+
+          <!-- 4. Net Profit = gross profit minus recorded expenses -->
+          <div class="kpi-card" id="cardNetProfit">
+            <div class="kpi-top">
+              <span class="kpi-label" id="kpiNetProfitLabel">Net Profit (Gross - Kharcha)</span>
+              <div class="kpi-icon-badge amber">💰</div>
+            </div>
+            <div class="kpi-value" id="kpiNetProfit" style="color:var(--primary-dark);">₹0</div>
+            <span id="kpiMonthNetProfit" style="display:none;">Net Profit: ₹0</span>
+            <span id="kpiTodayMarginBadge" style="display:none;">0% Margin</span>
+            <div class="kpi-meta" id="kpiNetProfitMeta">
+              <span class="badge-pill success" id="kpiNetMarginBadge">0.0% Net Margin</span>
+            </div>
+            <div class="kpi-origin-tag" id="kpiNetProfitOrigin">Actual: ₹0 • Demo: ₹0</div>
+          </div>
+
+          <!-- 5. Udhar Pending (Credit Ledger) -->
+          <div class="kpi-card" id="cardUdhar">
+            <div class="kpi-top">
+              <span class="kpi-label">Pending Credit (Udhar)</span>
+              <div class="kpi-icon-badge rose">🤝</div>
+            </div>
+            <div class="kpi-value" id="kpiTotalUdhar" style="color:#d97706;">₹0</div>
+            <div class="kpi-meta" id="kpiUdharCount">0 Customers Pending</div>
+            <div class="kpi-origin-tag" id="kpiUdharOrigin">Uncollected credit</div>
+          </div>
+
+          <!-- 6. Low Stock Alert -->
+          <div class="kpi-card" id="cardStock">
+            <div class="kpi-top">
+              <span class="kpi-label">Stock Warnings (Kam Stock)</span>
+              <div class="kpi-icon-badge amber">⚠️</div>
+            </div>
+            <div class="kpi-value" id="kpiLowStockCount" style="color:var(--warning-hover);">0 Items</div>
+            <div class="kpi-meta" id="kpiStockMeta">0 Out of Stock</div>
+            <div class="kpi-origin-tag" id="kpiStockOrigin">Restock recommended</div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="chart-grid">
+          <!-- 7-Day Sales vs Expenses Trend -->
+          <div class="dashboard-card">
+            <div class="card-header-row">
+              <div>
+                <h3>📊 7-Day Performance Trend</h3>
+                <span class="card-subtitle">Daily Sales (Bikri) vs Operating Expenses (Kharcha)</span>
+              </div>
+            </div>
+            <div class="canvas-container">
+              <canvas id="trendCanvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Category Sales Share -->
+          <div class="dashboard-card">
+            <div class="card-header-row">
+              <div>
+                <h3>🍰 Category Revenue Share</h3>
+                <span class="card-subtitle">Contribution of Grains, Oil, Spices, Dairy</span>
+              </div>
+            </div>
+            <div class="canvas-container">
+              <canvas id="categoryCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Activity Rows (Recent Sales & Low Stock List) -->
+        <div class="chart-grid">
+          <!-- Recent Sales Table -->
+          <div class="dashboard-card">
+            <div class="card-header-row">
+              <h3>🛍️ Recent Transactions</h3>
+              <button class="quick-action-btn outline" data-tab-target="sales" style="font-size:0.75rem;">View All Sales →</button>
+            </div>
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Bill #</th>
+                    <th>Customer</th>
+                    <th>Pay Mode</th>
+                    <th>Amount</th>
+                    <th>Source</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardRecentSales">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Low Stock Quick Action Widget -->
+          <div class="dashboard-card">
+            <div class="card-header-row">
+              <h3>⚠️ Critical Stock Restock</h3>
+              <button class="quick-action-btn outline" data-tab-target="inventory" style="font-size:0.75rem;">All Stock →</button>
+            </div>
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Stock Left</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardLowStockList">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Mode Share Widget -->
+        <div class="dashboard-card" style="margin-top:1.25rem;">
+          <div class="card-header-row">
+            <div>
+              <h3>💳 Payment Mode Distribution</h3>
+              <span class="card-subtitle">Cash vs UPI (QR Soundbox) vs Udhar (Customer Credit)</span>
+            </div>
+          </div>
+          <div class="canvas-container" style="min-height:200px;">
+            <canvas id="payModeCanvas"></canvas>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= 2. SALES MANAGEMENT & POS TAB ================= -->
+      <section class="tab-pane" id="tab-sales">
+        <!-- POS Split Screen -->
+        <div class="pos-layout">
+          <!-- Left: Catalog & Item Selection -->
+          <div class="pos-product-catalog">
+            <div class="toolbar-row" style="margin-bottom:0.85rem;">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="posSearchInput" placeholder="Search item by name or barcode (e.g. Atta, Oil, Maggi)...">
+              </div>
+              <select class="filter-select" id="posCategoryFilter">
+                <option value="All">All Categories</option>
+                <option value="Atta, Rice & Grains">Atta, Rice & Grains</option>
+                <option value="Dals & Pulses">Dals & Pulses</option>
+                <option value="Edible Oils & Ghee">Edible Oils & Ghee</option>
+                <option value="Spices & Masala">Spices & Masala</option>
+                <option value="Snacks & Packaged Food">Snacks & Packaged Food</option>
+                <option value="Dairy & Beverages">Dairy & Beverages</option>
+                <option value="Cleaning & Household">Cleaning & Household</option>
+                <option value="Personal Care">Personal Care</option>
+              </select>
+            </div>
+
+            <!-- Product Cards Grid -->
+            <div class="pos-grid" id="posProductsGrid">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- Right: Cart & Billing Panel -->
+          <div class="pos-cart-panel">
+            <div class="card-header-row" style="margin-bottom:0.75rem;">
+              <div>
+                <h3 style="font-size:1.1rem;">🧾 Current Bill</h3>
+                <span class="card-subtitle" id="posCartItemsCount">0 items</span>
+              </div>
+              <button class="quick-action-btn outline" onclick="clearCart()" style="padding:0.25rem 0.5rem; font-size:0.75rem;">Clear</button>
+            </div>
+
+            <!-- Customer Details for Bill -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; margin-bottom:0.5rem;">
+              <div>
+                <input type="text" id="posCustomerName" list="existingCustomersList" class="form-input" placeholder="Customer Name (e.g. Sharma Ji)" style="font-size:0.82rem; padding:0.45rem 0.65rem;">
+                <datalist id="existingCustomersList"></datalist>
+              </div>
+              <div>
+                <input type="text" id="posCustomerPhone" class="form-input" placeholder="Mobile # (for WhatsApp)" style="font-size:0.82rem; padding:0.45rem 0.65rem;">
+              </div>
+            </div>
+
+            <!-- Sale Date & Time -->
+            <div style="margin-bottom:0.75rem;">
+              <input type="datetime-local" id="posSaleDate" class="form-input" style="font-size:0.82rem; padding:0.4rem 0.65rem;" title="Sale Date & Time">
+            </div>
+
+            <!-- Cart Items Scroll -->
+            <div class="cart-items-list" id="posCartItemsList">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Cart Summary & Calculation -->
+            <div class="pos-cart-summary">
+              <div class="summary-row">
+                <span>Subtotal:</span>
+                <strong id="posCartSubtotal">₹0</strong>
+              </div>
+              <div class="summary-row" style="align-items:center;">
+                <span>Discount (₹):</span>
+                <input type="number" id="posCartDiscount" value="0" min="0" class="form-input" style="width:75px; padding:0.2rem 0.4rem; text-align:right;" oninput="renderCart()">
+              </div>
+              <div class="summary-row total">
+                <span>Total Amount:</span>
+                <span id="posCartTotal" style="color:var(--primary);">₹0</span>
+              </div>
+              <div style="font-size:0.75rem; color:#10b981; margin-top:0.35rem;" id="posCartProfitPreview">
+                Est. Profit: ₹0
+              </div>
+            </div>
+
+            <!-- Payment Method Selector -->
+            <div style="font-size:0.8rem; font-weight:600; color:var(--slate-700); margin-bottom:0.4rem;">Select Payment Method:</div>
+            <div class="pay-mode-selector">
+              <button class="pay-mode-btn active" data-mode="UPI">📱 UPI / QR</button>
+              <button class="pay-mode-btn" data-mode="Cash">💵 Cash</button>
+              <button class="pay-mode-btn" data-mode="Udhar">📝 Udhar (Credit)</button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.65rem;">
+              <button class="quick-action-btn primary" id="completeSaleBtn" style="justify-content:center; padding:0.75rem;">
+                ✓ Complete Sale
+              </button>
+              <button class="quick-action-btn success" id="completeSalePrintBtn" style="justify-content:center; padding:0.75rem;">
+                🖨️ Bill & Print
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sales Transaction History -->
+        <div class="dashboard-card" style="margin-top:1.75rem;">
+          <div class="card-header-row">
+            <div>
+              <h3>📜 Sales History & Bahi Khata</h3>
+              <span class="card-subtitle">All past customer bills with receipt reprint & WhatsApp share</span>
+            </div>
+            <div class="filter-group">
+              <button class="quick-action-btn primary" onclick="openRecordSaleModal()" style="font-size:0.8rem; padding:0.45rem 0.8rem;">
+                ⚡ Record Sale
+              </button>
+              <div class="search-box" style="min-width:200px;">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="salesSearchInput" placeholder="Search bill # or customer...">
+              </div>
+              <select class="filter-select" id="salesPaymentFilter">
+                <option value="All">All Payment Modes</option>
+                <option value="Cash">Cash</option>
+                <option value="UPI">UPI / QR</option>
+                <option value="Udhar">Udhar (Credit)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Invoice #</th>
+                  <th>Date & Time</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                  <th>Bill Amount</th>
+                  <th>Source</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="salesTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= 3. EXPENSE MANAGEMENT TAB ================= -->
+      <section class="tab-pane" id="tab-expenses">
+        <div class="toolbar-row">
+          <div>
+            <h3 style="font-size:1.15rem; font-weight:700;">Kharcha Bahi Khata (Expense Ledger)</h3>
+            <span style="font-size:0.8rem; color:var(--slate-500);">Keep every rupee of shop expense accounted for</span>
+          </div>
+
+          <div class="filter-group">
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="expenseSearchInput" placeholder="Search expense title or vendor...">
+            </div>
+            <select class="filter-select" id="expenseCategoryFilter">
+              <option value="All">All Categories</option>
+              <option value="Shop Rent">Shop Rent</option>
+              <option value="Electricity & Utilities">Electricity & Utilities</option>
+              <option value="Staff Salary">Staff Salary</option>
+              <option value="Transportation & Freight">Transportation / Tempo</option>
+              <option value="Packaging & Bags">Packaging & Bags</option>
+              <option value="Refreshments & Hospitality">Chai & Refreshments</option>
+              <option value="Shop Maintenance">Maintenance</option>
+              <option value="Miscellaneous">Miscellaneous</option>
+            </select>
+            <button class="quick-action-btn success" onclick="openModal('addExpenseModal')">
+              + Record Expense
+            </button>
+          </div>
+        </div>
+
+        <!-- Expense Total Banner -->
+        <div style="background:linear-gradient(135deg, #fff1f2, #ffe4e6); border:1px solid #fecdd3; border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <span style="font-size:0.82rem; font-weight:600; color:#9f1239; text-transform:uppercase;">Total Filtered Expenses</span>
+            <div style="font-size:1.8rem; font-weight:800; color:#e11d48;" id="expensesTotalBanner">₹0</div>
+          </div>
+          <span style="font-size:2rem;">📉</span>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Title / Description</th>
+                  <th>Category</th>
+                  <th>Paid To</th>
+                  <th>Payment Mode</th>
+                  <th>Amount</th>
+                  <th>Source</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="expensesTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= 4. PRODUCT & INVENTORY TAB ================= -->
+      <section class="tab-pane" id="tab-inventory">
+        <div class="toolbar-row">
+          <div>
+            <h3 style="font-size:1.15rem; font-weight:700;">Product Catalog & Inventory</h3>
+            <span style="font-size:0.8rem; color:var(--slate-500);">Monitor stock levels, margins, and purchase rates</span>
+          </div>
+
+          <div class="filter-group">
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="invSearchInput" placeholder="Search product name or SKU...">
+            </div>
+            <select class="filter-select" id="invCategoryFilter">
+              <option value="All">All Categories</option>
+              <option value="Atta, Rice & Grains">Atta, Rice & Grains</option>
+              <option value="Dals & Pulses">Dals & Pulses</option>
+              <option value="Edible Oils & Ghee">Edible Oils & Ghee</option>
+              <option value="Spices & Masala">Spices & Masala</option>
+              <option value="Snacks & Packaged Food">Snacks & Packaged Food</option>
+              <option value="Dairy & Beverages">Dairy & Beverages</option>
+              <option value="Cleaning & Household">Cleaning & Household</option>
+              <option value="Personal Care">Personal Care</option>
+            </select>
+            <select class="filter-select" id="invStatusFilter">
+              <option value="All">All Stock Levels</option>
+              <option value="LowStock">⚠️ Low Stock (≤ Min)</option>
+              <option value="OutOfStock">🔴 Out of Stock</option>
+              <option value="InStock">🟢 In Stock</option>
+            </select>
+            <button class="quick-action-btn primary" onclick="openAddProductModal()">
+              + Add Product
+            </button>
+          </div>
+        </div>
+
+        <!-- Inventory KPI Summary Banner: Calculates inventory value using purchase cost × stock quantity -->
+        <div style="background:linear-gradient(135deg, #eff6ff, #dbeafe); border:1px solid #bfdbfe; border-radius:var(--radius-lg); padding:1.15rem 1.35rem; margin-bottom:1.5rem; display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem;">
+          <div>
+            <span style="font-size:0.75rem; font-weight:700; color:#1e40af; text-transform:uppercase; letter-spacing:0.04em;">Total Inventory Value (Cost)</span>
+            <div style="font-size:1.75rem; font-weight:800; color:#1d4ed8;" id="invTotalCostValue">₹0.00</div>
+            <span style="font-size:0.75rem; color:#60a5fa;">Purchase Cost × Stock Quantity</span>
+          </div>
+          <div>
+            <span style="font-size:0.75rem; font-weight:700; color:#1e40af; text-transform:uppercase; letter-spacing:0.04em;">Total Retail Value (MRP)</span>
+            <div style="font-size:1.75rem; font-weight:800; color:#0f766e;" id="invTotalRetailValue">₹0.00</div>
+            <span style="font-size:0.75rem; color:#60a5fa;">Selling Price × Stock Quantity</span>
+          </div>
+          <div>
+            <span style="font-size:0.75rem; font-weight:700; color:#1e40af; text-transform:uppercase; letter-spacing:0.04em;">Stocked Units</span>
+            <div style="font-size:1.75rem; font-weight:800; color:var(--slate-800);" id="invTotalStockUnits">0 Units</div>
+            <span style="font-size:0.75rem; color:var(--slate-500);" id="invProductsCount">0 Catalog Products</span>
+          </div>
+          <div>
+            <span style="font-size:0.75rem; font-weight:700; color:#1e40af; text-transform:uppercase; letter-spacing:0.04em;">Inventory Alerts</span>
+            <div style="font-size:1.75rem; font-weight:800; color:#b45309;" id="invStockAlertsValue">0 Items</div>
+            <span style="font-size:0.75rem; color:#d97706;" id="invStockAlertsMeta">0 Out of Stock • 0 Low</span>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>SKU / Barcode</th>
+                  <th>Product Name</th>
+                  <th>Category</th>
+                  <th>Purchase Cost (CP)</th>
+                  <th>Selling Price (SP)</th>
+                  <th>Margin %</th>
+                  <th>Stock Qty</th>
+                  <th>Inventory Value (CP × Qty)</th>
+                  <th>Stock Status</th>
+                  <th>Source</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= 5. PROFIT CALCULATOR TAB ================= -->
+      <section class="tab-pane" id="tab-calculator">
+        <div class="calc-grid">
+          <!-- Item Profit & Margin Simulator -->
+          <div class="calculator-card">
+            <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:0.35rem;">🧮 Product Margin & Markup Simulator</h3>
+            <p style="font-size:0.8rem; color:var(--slate-500); margin-bottom:1.25rem;">
+              Calculate how much net cash profit you make per packet or per kilo.
+            </p>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Wholesale Cost Price (₹):</label>
+                <input type="number" id="calcCostPrice" value="130" class="form-input" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Your Selling Price / MRP (₹):</label>
+                <input type="number" id="calcSellingPrice" value="160" class="form-input" min="0">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Estimated Monthly Sales Units:</label>
+              <input type="number" id="calcEstUnits" value="50" class="form-input" min="1">
+            </div>
+
+            <div class="calc-result-box">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.85rem; color:var(--slate-600);">Net Profit Per Unit:</span>
+                <strong style="font-size:1.4rem; color:var(--success);" id="calcUnitProfit">₹30</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.85rem; color:var(--slate-600);">Gross Margin %:</span>
+                <strong style="font-size:1.1rem; color:var(--primary);" id="calcGrossMargin">18.8%</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.85rem; color:var(--slate-600);">Markup on Cost %:</span>
+                <strong style="font-size:1.1rem; color:var(--slate-700);" id="calcMarkup">23.1%</strong>
+              </div>
+              <div style="border-top:1px dashed #cbd5e1; padding-top:0.5rem; margin-top:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:700;">Total Projected Monthly Profit:</span>
+                <strong style="font-size:1.3rem; color:var(--primary-dark);" id="calcTotalProjectedProfit">₹1,500</strong>
+              </div>
+              <div style="margin-top:0.75rem;">
+                <span id="calcVerdict" class="status-badge completed">High Margin — Excellent for Kirana!</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Simple Profit Calculator with Cost, Additional Unit Costs, and Target Profit Margin -->
+          <div class="calculator-card">
+            <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:0.35rem;">🎯 Simple Profit & Target Price Calculator</h3>
+            <p style="font-size:0.8rem; color:var(--slate-500); margin-bottom:1.25rem;">
+              Set base purchase cost, additional per-unit overheads (freight/packaging), and desired target profit margin to determine the exact selling price and profit.
+            </p>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Base Cost Price (₹):</label>
+                <input type="number" id="unitBaseCost" value="100" class="form-input" min="0" step="any" placeholder="e.g. 100">
+                <!-- Hidden alias for targetCostPrice backward compatibility -->
+                <input type="hidden" id="targetCostPrice" value="100">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Additional Unit Costs (₹):</label>
+                <input type="number" id="unitAddlCost" value="15" class="form-input" min="0" step="any" placeholder="Freight, packing, labor">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Target Profit Margin (%):</label>
+                <input type="number" id="unitTargetMargin" value="20" class="form-input" min="0" max="99.9" step="any" placeholder="e.g. 20%">
+                <!-- Hidden alias for targetMarginPercent backward compatibility -->
+                <input type="hidden" id="targetMarginPercent" value="20">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Quantity / Batch Units:</label>
+                <input type="number" id="unitCalcQuantity" value="10" class="form-input" min="1" step="1" placeholder="e.g. 10">
+              </div>
+            </div>
+
+            <!-- Error banner if validation fails -->
+            <div id="unitCalcError" style="display:none; color:#e11d48; font-size:0.8rem; padding:0.5rem; background:#ffe4e6; border-radius:var(--radius-sm); margin-bottom:0.75rem;"></div>
+
+            <div class="calc-result-box" style="margin-top:1rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.85rem; color:var(--slate-600);">Total Landed Cost / Unit:</span>
+                <strong style="font-size:1.1rem; color:var(--slate-700);" id="unitTotalCostDisplay">₹115.00</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.85rem; color:var(--slate-600);">Recommended Selling Price:</span>
+                <strong style="font-size:1.4rem; color:var(--primary);" id="unitRequiredSp">₹143.75</strong>
+              </div>
+              <span id="targetResultSp" style="display:none;">₹143.75</span>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.85rem; color:var(--slate-600);">Unit Gross Profit:</span>
+                <strong style="font-size:1.15rem; color:var(--success);" id="unitGrossProfitDisplay">₹28.75</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.85rem; color:var(--slate-600);">Markup on Landed Cost %:</span>
+                <strong style="font-size:1.05rem; color:var(--slate-700);" id="unitMarkupDisplay">25.0%</strong>
+              </div>
+
+              <!-- Batch Projected Totals -->
+              <div style="border-top:1px dashed #cbd5e1; padding-top:0.65rem; margin-top:0.65rem;">
+                <span style="font-size:0.8rem; font-weight:700; color:var(--slate-700); display:block; margin-bottom:0.35rem;">Projected Batch Totals (<span id="unitBatchQtyLabel">10</span> units):</span>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; text-align:center;">
+                  <div style="background:#f8fafc; padding:0.4rem; border-radius:4px;">
+                    <div style="font-size:0.7rem; color:var(--slate-500);">Revenue</div>
+                    <strong style="font-size:0.9rem; color:var(--primary);" id="unitBatchRevenue">₹1,437.50</strong>
+                  </div>
+                  <div style="background:#f8fafc; padding:0.4rem; border-radius:4px;">
+                    <div style="font-size:0.7rem; color:var(--slate-500);">Landed COGS</div>
+                    <strong style="font-size:0.9rem; color:var(--slate-700);" id="unitBatchCOGS">₹1,150.00</strong>
+                  </div>
+                  <div style="background:#f0fdf4; padding:0.4rem; border-radius:4px;">
+                    <div style="font-size:0.7rem; color:var(--slate-500);">Gross Profit</div>
+                    <strong style="font-size:0.9rem; color:var(--success);" id="unitBatchProfit">₹287.50</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Indian Kirana Margin Benchmark Table -->
+            <div style="margin-top:1.5rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
+              <h4 style="font-size:0.85rem; font-weight:700; margin-bottom:0.5rem;">Typical Indian Kirana Margins Reference:</h4>
+              <ul style="font-size:0.78rem; color:var(--slate-600); line-height:1.7; padding-left:1.2rem;">
+                <li><strong>Loose Grains & Pulses:</strong> 15% – 25% margin</li>
+                <li><strong>Spices & Masale:</strong> 20% – 35% margin (High Profit!)</li>
+                <li><strong>Branded Edible Oil & Ghee:</strong> 5% – 8% margin</li>
+                <li><strong>Biscuits & Snacks:</strong> 10% – 15% margin</li>
+                <li><strong>Personal Care & Soaps:</strong> 8% – 14% margin</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= 6. "ASK YOUR BUSINESS" ASSISTANT TAB ================= -->
+      <section class="tab-pane" id="tab-ai">
+        <div class="ai-chat-wrapper">
+          <div class="ai-chat-header">
+            <div class="ai-header-left">
+              <div class="ai-spark-icon">💼</div>
+              <div>
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                  <h3 style="font-size:1.05rem; font-weight:700; margin:0;">Ask Your Business — Store Assistant</h3>
+                  <span class="badge-pill" id="assistantModeBadge" style="background:#e0e7ff; color:#3730a3; font-size:0.7rem; padding:0.15rem 0.5rem; font-weight:700;">⚙️ Rule-Based Assistant (Verified Ledger)</span>
+                </div>
+                <p style="font-size:0.75rem; color:#cbd5e1; margin-top:0.25rem;">
+                  Deterministic calculations directly from your active store records • No hallucination
+                </p>
+              </div>
+            </div>
+            <button class="quick-action-btn outline" id="clearChatBtn" style="color:#ffffff; border-color:rgba(255,255,255,0.3); background:transparent; font-size:0.75rem;">
+              Reset Chat
+            </button>
+          </div>
+
+          <!-- Chat Stream Messages -->
+          <div class="ai-messages-container" id="aiMessagesContainer">
+            <!-- Messages inserted here -->
+          </div>
+
+          <!-- Suggested Questions Label -->
+          <div style="padding:0.5rem 1rem 0; font-size:0.75rem; font-weight:700; color:var(--slate-500); display:flex; align-items:center; gap:0.4rem;">
+            <span>💡 Suggested Business Questions:</span>
+          </div>
+
+          <!-- Clickable Suggestion Chips -->
+          <div class="ai-prompt-chips" id="aiPromptChips">
+            <!-- Quick Chips inserted here -->
+          </div>
+
+          <!-- Input Bar -->
+          <div class="ai-input-bar">
+            <input type="text" id="aiChatInput" placeholder="Ask a business question (e.g. 'What is my net profit?', 'Which products should I restock?')...">
+            <button class="ai-send-btn" id="aiSendBtn">➤</button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= 7. SMART INSIGHTS & ALERTS HUB ================= -->
+      <section class="tab-pane" id="tab-insights">
+        <!-- Toolbar Header -->
+        <div class="toolbar-row" style="margin-bottom:1.25rem;">
+          <div>
+            <h3 style="font-size:1.2rem; font-weight:700; color:var(--slate-800);">Business Insights & Intelligence</h3>
+            <span style="font-size:0.82rem; color:var(--slate-500);">Live financial health, low-stock alerts, top sellers, and data-driven recommendations</span>
+          </div>
+
+          <div class="filter-group">
+            <select class="filter-select" id="insightsPeriodSelect" onchange="renderInsightsHub()">
+              <option value="all">All-Time Cumulative</option>
+              <option value="month">This Month (October)</option>
+              <option value="today">Today's Performance</option>
+            </select>
+            <button class="quick-action-btn success" id="generateWholesaleOrderBtn" style="font-size:0.78rem;">
+              📲 WhatsApp Order
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. Gross Profit & Net Profit Financial Summaries (Requirement 4 & 6) -->
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin-bottom:1.5rem;" id="insightsFinancialSummaryGrid">
+          <!-- Card 1: Completed Sales Revenue -->
+          <div class="kpi-card" style="border-left: 4px solid var(--primary);">
+            <div class="kpi-title">Completed Revenue (Bikri)</div>
+            <div class="kpi-value" id="insightsRevenueVal" style="color:var(--primary);">₹0.00</div>
+            <div class="kpi-subtext" id="insightsRevenueMeta">0 Completed Invoices</div>
+          </div>
+
+          <!-- Card 2: Cost of Goods Sold (COGS) -->
+          <div class="kpi-card" style="border-left: 4px solid var(--slate-600);">
+            <div class="kpi-title">Cost of Goods Sold (COGS)</div>
+            <div class="kpi-value" id="insightsCOGSVal" style="color:var(--slate-700);">₹0.00</div>
+            <div class="kpi-subtext">Direct wholesale purchase cost</div>
+          </div>
+
+          <!-- Card 3: Gross Profit -->
+          <div class="kpi-card" style="border-left: 4px solid var(--success);">
+            <div class="kpi-title">Gross Profit (Bikri Munafa)</div>
+            <div class="kpi-value" id="insightsGrossProfitVal" style="color:var(--success);">₹0.00</div>
+            <div class="kpi-subtext" id="insightsGrossMarginMeta">0.0% Gross Margin</div>
+          </div>
+
+          <!-- Card 4: Operating Expenses -->
+          <div class="kpi-card" style="border-left: 4px solid #f43f5e;">
+            <div class="kpi-title">Recorded Expenses (Kharcha)</div>
+            <div class="kpi-value" id="insightsExpensesVal" style="color:#e11d48;">₹0.00</div>
+            <div class="kpi-subtext" id="insightsExpenseMeta">0 Deduplicated Entries</div>
+          </div>
+
+          <!-- Card 5: Net Profit -->
+          <div class="kpi-card" style="border-left: 4px solid #8b5cf6;">
+            <div class="kpi-title">Net Profit (Shuddh Munafa)</div>
+            <div class="kpi-value" id="insightsNetProfitVal" style="color:#6d28d9;">₹0.00</div>
+            <div class="kpi-subtext" id="insightsNetMarginMeta">0.0% Net Margin</div>
+          </div>
+        </div>
+
+        <!-- 2. Charts & Top Sellers Grid (Requirements 2, 3 & 6) -->
+        <div class="chart-grid" style="margin-bottom:1.5rem;">
+          <!-- Left: Revenue & Expense Trend by Date -->
+          <div class="dashboard-card" style="display:flex; flex-direction:column;">
+            <div class="card-header-row">
+              <div>
+                <h3 style="font-size:1.05rem; font-weight:700;">Daily Revenue & Expense Trend</h3>
+                <span class="card-subtitle">Grouped by actual transaction date from completed sales and expenses</span>
+              </div>
+            </div>
+
+            <!-- Canvas Chart Container -->
+            <div style="position:relative; width:100%; min-height:260px; flex:1; display:flex; align-items:center; justify-content:center;">
+              <canvas id="insightsTrendCanvas" style="width:100%; height:260px; display:block;"></canvas>
+
+              <!-- Empty State: When no dated records exist -->
+              <div id="insightsTrendEmptyState" style="display:none; flex-direction:column; align-items:center; justify-content:center; padding:2.5rem 1.5rem; text-align:center; width:100%;">
+                <div style="font-size:2.5rem; margin-bottom:0.75rem;">📊</div>
+                <strong style="color:var(--slate-700); font-size:1rem; margin-bottom:0.35rem;">No Dated Transactions Found</strong>
+                <p style="color:var(--slate-500); font-size:0.85rem; max-width:320px; margin:0;">
+                  Record customer sales in the POS counter or log operating expenses to see your daily financial trend.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Top-Selling Products by Completed Quantity -->
+          <div class="dashboard-card" style="display:flex; flex-direction:column;">
+            <div class="card-header-row">
+              <div>
+                <h3 style="font-size:1.05rem; font-weight:700;">Top-Selling Products</h3>
+                <span class="card-subtitle">Ranked by completed customer sale quantities</span>
+              </div>
+              <span class="badge-pill" id="insightsTopSellerCountBadge" style="background:#e0f2fe; color:#0369a1; font-size:0.72rem;">0 Items</span>
+            </div>
+
+            <!-- List Container -->
+            <div id="insightsTopSellingList" style="flex:1; display:flex; flex-direction:column;">
+              <!-- Populated dynamically -->
+            </div>
+
+            <!-- Empty State: When no completed sales exist -->
+            <div id="insightsTopSellingEmptyState" style="display:none; flex-direction:column; align-items:center; justify-content:center; padding:2.5rem 1.5rem; text-align:center; flex:1;">
+              <div style="font-size:2.5rem; margin-bottom:0.75rem;">🛒</div>
+              <strong style="color:var(--slate-700); font-size:1rem; margin-bottom:0.35rem;">No Completed Sales Yet</strong>
+              <p style="color:var(--slate-500); font-size:0.85rem; max-width:300px; margin:0;">
+                Once you complete customer bills in the Sales POS tab, your highest-velocity products will appear here.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Three Concise Data-Driven Business Recommendations (Requirements 5 & 7) -->
+        <div class="dashboard-card" style="margin-bottom:1.5rem; background:linear-gradient(135deg, #f8fafc, #f1f5f9); border:1px solid #cbd5e1;">
+          <div class="card-header-row" style="margin-bottom:0.75rem;">
+            <div>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-size:1.3rem;">💡</span>
+                <h3 style="font-size:1.1rem; font-weight:700; color:var(--slate-800); margin:0;">Data-Driven Business Recommendations</h3>
+              </div>
+              <span class="card-subtitle">Three concise action steps calculated directly from your live inventory, sales, and expense records</span>
+            </div>
+          </div>
+
+          <div id="insightsRecommendationsList" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; margin-top:0.75rem;">
+            <!-- Three recommendation cards inserted dynamically -->
+          </div>
+        </div>
+
+        <!-- 4. Low-Stock Alerts & Wholesaler Reorder Hub (Requirement 1 & 6) -->
+        <div class="dashboard-card" style="margin-bottom:1.5rem;">
+          <div class="card-header-row">
+            <div>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-size:1.25rem;">⚠️</span>
+                <h3 style="font-size:1.05rem; font-weight:700; margin:0;">Low-Stock Inventory Alerts</h3>
+              </div>
+              <span class="card-subtitle">Products at or below their configured minimum safety stock threshold</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span class="badge-pill" id="insightsLowStockBadge" style="background:#fee2e2; color:#b91c1c; font-size:0.72rem;">0 Items</span>
+            </div>
+          </div>
+
+          <div id="insightsLowStockList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- 5. Udhar (Credit) Recovery Hub -->
+        <div class="dashboard-card">
+          <div class="card-header-row">
+            <div>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-size:1.25rem;">🤝</span>
+                <h3 style="font-size:1.05rem; font-weight:700; margin:0;">Customer Credit (Udhar) Recovery Hub</h3>
+              </div>
+              <span class="card-subtitle">Polite WhatsApp payment reminders with your UPI QR</span>
+            </div>
+            <span class="badge-pill" id="insightsDebtorCountBadge" style="background:#fef3c7; color:#b45309; font-size:0.72rem;">0 Pending</span>
+          </div>
+          <div id="insightsDebtorList">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= 8. CUSTOMER UDHAR BAHI KHATA TAB ================= -->
+      <section class="tab-pane" id="tab-udhar">
+        <div class="toolbar-row">
+          <div>
+            <h3 style="font-size:1.15rem; font-weight:700;">Grahak Udhar Bahi Khata (Customer Credit Ledger)</h3>
+            <span style="font-size:0.8rem; color:var(--slate-500);">Track balances, record cash/UPI recoveries, and clear debts</span>
+          </div>
+
+          <div class="filter-group">
+            <button class="quick-action-btn primary" onclick="openModal('addCustomerModal')">
+              + New Customer Account
+            </button>
+          </div>
+        </div>
+
+        <!-- Banner -->
+        <div style="background:linear-gradient(135deg, #fffbeb, #fef3c7); border:1px solid #fde68a; border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1.5rem; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <span style="font-size:0.82rem; font-weight:600; color:#b45309; text-transform:uppercase;">Total Outstanding Customer Credit</span>
+            <div style="font-size:1.8rem; font-weight:800; color:#d97706;" id="udharTotalBanner">₹0</div>
+          </div>
+          <span style="font-size:2rem;">📝</span>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Customer Name</th>
+                  <th>Mobile Number</th>
+                  <th>Area / Address</th>
+                  <th>Last Transaction</th>
+                  <th>Pending Balance</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="udharTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+
+<!-- ================= MOBILE BOTTOM NAVIGATION ================= -->
+<div class="mobile-bottom-nav no-print">
+  <button class="mobile-nav-btn active" data-tab-target="dashboard">
+    <span class="mobile-nav-icon">📊</span>
+    <span>Home</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab-target="sales">
+    <span class="mobile-nav-icon">🛍️</span>
+    <span>Bikri</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab-target="inventory">
+    <span class="mobile-nav-icon">📦</span>
+    <span>Stock</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab-target="calculator">
+    <span class="mobile-nav-icon">🧮</span>
+    <span>Profit</span>
+  </button>
+  <button class="mobile-nav-btn" data-tab-target="ai">
+    <span class="mobile-nav-icon">✨</span>
+    <span>AI</span>
+  </button>
+</div>
+
+
+<!-- ================= MODALS ================= -->
+
+<!-- 1. Add / Edit Product Modal -->
+<div class="modal-overlay" id="addProductModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="modalProductTitle">Add Product to Inventory</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <form id="addProductForm">
+      <div class="modal-body">
+        <input type="hidden" id="prodEditId">
+        <div class="form-group">
+          <label class="form-label">Product Name *</label>
+          <input type="text" id="prodName" class="form-input" placeholder="e.g. Fortune Sunflower Oil 1L" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="prodCategory" class="form-select">
+              <option value="Atta, Rice & Grains">Atta, Rice & Grains</option>
+              <option value="Dals & Pulses">Dals & Pulses</option>
+              <option value="Edible Oils & Ghee">Edible Oils & Ghee</option>
+              <option value="Spices & Masala">Spices & Masala</option>
+              <option value="Snacks & Packaged Food">Snacks & Packaged Food</option>
+              <option value="Dairy & Beverages">Dairy & Beverages</option>
+              <option value="Cleaning & Household">Cleaning & Household</option>
+              <option value="Personal Care">Personal Care</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Barcode / SKU</label>
+            <input type="text" id="prodSku" class="form-input" placeholder="e.g. 890103001">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Wholesale Cost (CP ₹) *</label>
+            <input type="number" id="prodCostPrice" class="form-input" step="0.5" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Retail Selling (SP ₹) *</label>
+            <input type="number" id="prodSellingPrice" class="form-input" step="0.5" required>
+          </div>
+        </div>
+
+        <div style="font-size:0.8rem; color:var(--slate-600); margin-bottom:1rem; background:#f8fafc; padding:0.5rem; border-radius:var(--radius-sm);">
+          Live Profit Preview: <strong id="prodMarginPreview" style="color:var(--success);">-</strong>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Current Stock Qty</label>
+            <input type="number" id="prodStock" class="form-input" value="10" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Min Alert Limit</label>
+            <input type="number" id="prodMinStock" class="form-input" value="5" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Measuring Unit</label>
+          <select id="prodUnit" class="form-select">
+            <option value="Pkt">Packet (Pkt)</option>
+            <option value="kg">Kilogram (kg)</option>
+            <option value="Bag">Bag / Bori</option>
+            <option value="L">Litre (L)</option>
+            <option value="Pouch">Pouch</option>
+            <option value="Bottle">Bottle</option>
+            <option value="Tin">Tin</option>
+            <option value="Box">Box</option>
+            <option value="Pc">Piece (Pc)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="quick-action-btn outline" data-modal-close>Cancel</button>
+        <button type="submit" class="quick-action-btn primary">Save Product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 2. Add Expense Modal -->
+<div class="modal-overlay" id="addExpenseModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Record Store Expense (Kharcha)</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <form id="addExpenseForm">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expense Date *</label>
+            <input type="date" id="expDate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expense Description / Title *</label>
+            <input type="text" id="expTitle" class="form-input" placeholder="e.g. Tempo freight from mandi, Chai snacks" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (₹) *</label>
+            <input type="number" id="expAmount" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="expCategory" class="form-select">
+              <option value="Transportation & Freight">Transportation / Tempo</option>
+              <option value="Refreshments & Hospitality">Chai & Refreshments</option>
+              <option value="Packaging & Bags">Packaging Bags</option>
+              <option value="Electricity & Utilities">Electricity & Utilities</option>
+              <option value="Shop Rent">Shop Rent</option>
+              <option value="Staff Salary">Staff Salary</option>
+              <option value="Shop Maintenance">Maintenance</option>
+              <option value="Miscellaneous">Miscellaneous</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Paid To (Vendor Name)</label>
+            <input type="text" id="expPaidTo" class="form-input" placeholder="e.g. Kalu Tempo, Tea Stall">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select id="expPayMode" class="form-select">
+              <option value="Cash">Cash (Rokad)</option>
+              <option value="UPI">UPI / QR</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Details</label>
+          <textarea id="expNotes" class="form-textarea" rows="2" placeholder="Optional remarks"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="quick-action-btn outline" data-modal-close>Cancel</button>
+        <button type="submit" class="quick-action-btn success">Save Expense</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 2b. Direct Record a Sale Modal -->
+<div class="modal-overlay" id="recordSaleModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Record a Sale (Bikri Entry)</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <form id="recordSaleForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Select Product *</label>
+          <select id="directSaleProductSelect" class="form-select" required>
+            <option value="">-- Choose Product --</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Unit Selling Price</label>
+            <input type="text" id="directSaleUnitPrice" class="form-input" readonly value="₹0" style="background:#f8fafc; font-weight:700; color:var(--slate-800);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Quantity Sold *</label>
+            <input type="number" id="directSaleQuantity" class="form-input" value="1" min="1" required>
+            <small id="directSaleStockHint" style="font-size:0.75rem; color:var(--slate-500); display:block; margin-top:0.25rem;">Available Stock: -</small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Sale Date & Time *</label>
+            <input type="datetime-local" id="directSaleDate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select id="directSalePaymentMode" class="form-select">
+              <option value="Cash">Cash (Rokad)</option>
+              <option value="UPI">UPI / QR</option>
+              <option value="Udhar">Udhar (Credit)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Customer Name</label>
+          <input type="text" id="directSaleCustomer" list="existingCustomersList" class="form-input" placeholder="Walk-in Customer">
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:var(--radius-md); padding:0.85rem; margin-top:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-size:0.85rem; color:var(--slate-600); display:block;">Total Bill Amount:</span>
+            <small id="directSaleCalculationNote" style="font-size:0.75rem; color:var(--slate-500);">Selling Price × Quantity</small>
+          </div>
+          <strong id="directSaleTotal" style="font-size:1.35rem; color:var(--primary);">₹0</strong>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="quick-action-btn outline" data-modal-close>Cancel</button>
+        <button type="submit" class="quick-action-btn primary" id="directSaleSubmitBtn">✓ Confirm & Record Sale</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 3. Add Customer Modal -->
+<div class="modal-overlay" id="addCustomerModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>New Customer Khata Account</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <form id="addCustomerForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Customer Full Name *</label>
+          <input type="text" id="custNameInput" class="form-input" placeholder="e.g. Verma Contractor, Sharma Ji" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp Mobile Number</label>
+          <input type="tel" id="custPhoneInput" class="form-input" placeholder="10-digit mobile number">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Initial Udhar Balance (₹, optional)</label>
+          <input type="number" id="custCreditInput" class="form-input" value="0">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="quick-action-btn outline" data-modal-close>Cancel</button>
+        <button type="submit" class="quick-action-btn primary">Create Account</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 4. Settle Udhar Payment Modal -->
+<div class="modal-overlay" id="settleUdharModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Receive Udhar Payment (Hisaab Chuka)</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <form id="settleUdharForm">
+      <div class="modal-body">
+        <input type="hidden" id="settleCustId">
+        <div style="margin-bottom:1rem; background:#f8fafc; padding:0.85rem; border-radius:var(--radius-md);">
+          <div>Customer: <strong id="settleCustName">-</strong></div>
+          <div style="margin-top:0.25rem;">Current Pending Balance: <strong id="settleCurrentBalance" style="color:#e11d48;">₹0</strong></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount Received (₹) *</label>
+          <input type="number" id="settleAmountInput" class="form-input" required min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Received Via</label>
+          <select id="settlePayMode" class="form-select">
+            <option value="Cash">Cash (Rokad)</option>
+            <option value="UPI">PhonePe / GPay / Paytm</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="quick-action-btn outline" data-modal-close>Cancel</button>
+        <button type="submit" class="quick-action-btn success">Record Payment Received</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 5. Thermal Receipt & Invoice Modal -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal-card" style="max-width:440px;">
+    <div class="modal-header no-print">
+      <h3>Customer Receipt (Bill)</h3>
+      <button class="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:1rem;">
+      <div id="receipt-printable-area">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+    <div class="modal-footer no-print">
+      <button type="button" class="quick-action-btn outline" data-modal-close>Close</button>
+      <button type="button" class="quick-action-btn primary" onclick="window.print()">🖨️ Print Receipt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Scripts -->
+<script src="js/data.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/ai-assistant.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
+
